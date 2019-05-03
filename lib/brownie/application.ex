@@ -4,7 +4,7 @@ defmodule Brownie.Application do
   use Application
 
   def start(_type, _args) do
-    # TODO: Load configurations here.
+    # TODO: Load the configuration from a file here.
     storage_backend = Brownie.StorageMemory
 
     set_backend(storage_backend)
