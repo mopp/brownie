@@ -1,20 +1,27 @@
 defmodule Brownie.Application do
-  # See https://hexdocs.pm/elixir/Application.html
-  # for more information on OTP Applications
   @moduledoc false
 
   use Application
 
   def start(_type, _args) do
+    # TODO: Load configurations here.
+    storage_backend = Brownie.StorageMemory
+
+    set_backend(storage_backend)
+
     # List all child processes to be supervised
     children = [
-      # Starts a worker by calling: Brownie.Worker.start_link(arg)
-      # {Brownie.Worker, arg}
+      storage_backend
     ]
 
-    # See https://hexdocs.pm/elixir/Supervisor.html
-    # for other strategies and supported options
-    opts = [strategy: :one_for_one, name: Brownie.Supervisor]
-    Supervisor.start_link(children, opts)
+    Supervisor.start_link(children, strategy: :one_for_one)
+  end
+
+  def get_backend() do
+    Application.get_env(__MODULE__, :backend, Brownie.StorageMemory)
+  end
+
+  defp set_backend(backend) do
+    Application.put_env(__MODULE__, :backend, backend)
   end
 end
