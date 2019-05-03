@@ -3,6 +3,9 @@ defmodule Brownie do
   Documentation for Brownie.
   """
 
+  @type key() :: term()
+  @type value() :: term()
+
   @doc """
   Hello world.
 
