@@ -14,6 +14,29 @@ defmodule Brownie.Storage do
   @callback delete(key()) :: :ok | {:error, reason()}
 
   @doc """
+  Execute the given query.
+  """
+  @spec request(Brownie.Query.t()) :: :ok | {:ok, value()} | {:error, reason()}
+  def request(query) do
+    case query do
+      {:create, key, value} ->
+        create(key, value)
+
+      {:read, key} ->
+        read(key)
+
+      {:update, key, value} ->
+        update(key, value)
+
+      {:delete, key} ->
+        delete(key)
+
+      _ ->
+        {:error, {:got_unknown_query, query}}
+    end
+  end
+
+  @doc """
   Create Key-Value pair.
   """
   @spec create(key(), value()) :: :ok | {:error, reason()}
