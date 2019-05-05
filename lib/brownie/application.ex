@@ -7,14 +7,9 @@ defmodule Brownie.Application do
 
   @impl Application
   def start(_type, _args) do
-    # TODO: Load the configuration from a file here.
-    storage_backend = Brownie.StorageMemory
-
-    set_backend(storage_backend)
-
     # List all child processes to be supervised.
     children = [
-      storage_backend
+      get_backend()
     ]
 
     Supervisor.start_link(children, strategy: :one_for_one)
@@ -22,10 +17,6 @@ defmodule Brownie.Application do
 
   # TODO: refactor how to manage the configuration.
   def get_backend() do
-    Application.get_env(__MODULE__, :backend, Brownie.StorageMemory)
-  end
-
-  defp set_backend(backend) do
-    Application.put_env(__MODULE__, :backend, backend)
+    Application.get_env(:brownie, :storage_backend, Brownie.StorageMemory)
   end
 end
