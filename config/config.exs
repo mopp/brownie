@@ -30,4 +30,11 @@ use Mix.Config
 #     import_config "#{Mix.env()}.exs"
 
 config :brownie,
-  storage_backend: Brownie.StorageMemory
+  storage_backend: Brownie.StorageMemory,
+  cluster_members: [
+    :one@brownie,
+    :two@brownie,
+    :three@brownie,
+    :four@brownie,
+    :five@brownie
+  ]
