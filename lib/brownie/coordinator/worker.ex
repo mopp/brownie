@@ -63,9 +63,8 @@ defmodule Brownie.Coordinator.Worker do
       nodes ->
         case Brownie.Query.get_key(query) do
           {:ok, key} ->
-            base_index = rem(term_to_hash(key), length(nodes))
-            replica_nodes = select_nodes(nodes, base_index, replica_count)
-            Logger.debug("Selected replica nodes: #{inspect(replica_nodes)}")
+            replica_nodes = Brownie.Coordinator.Util.find_replica_nodes(key, nodes, replica_count)
+            Logger.debug("Execute: #{inspect(query)} -> #{inspect(replica_nodes)}")
 
             # TODO: execute asynchronously
             replica_nodes
@@ -78,20 +77,9 @@ defmodule Brownie.Coordinator.Worker do
     end
   end
 
-  @spec term_to_hash(term) :: non_neg_integer()
-  defp term_to_hash(term) do
-    # FIXME: use better hash method.
-    :crypto.bytes_to_integer(:erlang.term_to_binary(term))
-  end
-
-  @spec select_nodes([node()], non_neg_integer(), non_neg_integer()) :: [node()]
-  defp select_nodes(nodes, base_index, replica_count) do
-    Enum.slice(Enum.concat(nodes, nodes), base_index..(base_index + replica_count - 1))
-  end
-
   @spec handle_replica_results([result()], [node()], non_neg_integer()) :: result()
   defp handle_replica_results(results, replica_nodes, replica_count) do
-    Logger.debug("Results: #{inspect(results)}")
+    Logger.debug("Results: #{inspect(List.zip([replica_nodes, results]))}")
 
     {count_oks, result} =
       List.foldl(results, {0, nil}, fn

@@ -28,6 +28,11 @@ defmodule Brownie.StorageMemory do
     GenServer.call(__MODULE__, {:delete, key})
   end
 
+  @impl Storage
+  def keys() do
+    GenServer.call(__MODULE__, :keys)
+  end
+
   @impl GenServer
   def init([]) do
     {:ok, %{}}
@@ -75,6 +80,11 @@ defmodule Brownie.StorageMemory do
       _ ->
         {:reply, {:error, :not_found}, map}
     end
+  end
+
+  @impl GenServer
+  def handle_call(:keys, _, map) do
+    {:reply, {:ok, Map.keys(map)}, map}
   end
 
   @impl GenServer

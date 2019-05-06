@@ -41,6 +41,14 @@ defmodule Brownie.Application do
     Application.fetch_env!(:brownie, :cluster_members)
   end
 
+  @doc """
+  Update the cluster members.
+  NOTE: this function have to be called when detecting node down.
+  """
+  def set_cluster_members(members) do
+    Application.put_env(:brownie, :cluster_members, members)
+  end
+
   def get_replica_count() do
     Application.get_env(:brownie, :replica_count, 3)
   end

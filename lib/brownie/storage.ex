@@ -12,6 +12,7 @@ defmodule Brownie.Storage do
   @callback read(key()) :: {:ok, value()} | {:error, reason()}
   @callback update(key(), value()) :: :ok | {:error, reason()}
   @callback delete(key()) :: :ok | {:error, reason()}
+  @callback keys() :: {:ok, [key()]} | {:error, reason()}
 
   @doc """
   Execute the given query.
@@ -67,5 +68,13 @@ defmodule Brownie.Storage do
   @spec delete(key()) :: :ok | {:error, reason()}
   def delete(key) do
     Brownie.Application.get_backend().delete(key)
+  end
+
+  @doc """
+  Fetch current stored keys.
+  """
+  @spec keys() :: {:ok, [key()]} | {:error, reason()}
+  def keys() do
+    Brownie.Application.get_backend().keys()
   end
 end

@@ -4,5 +4,6 @@ defmodule Brownie.StorageTest do
   test "create and read key-value" do
     assert :ok == Brownie.Storage.create(:key, "value")
     assert {:ok, "value"} == Brownie.Storage.read(:key)
+    assert {:ok, [:key]} == Brownie.Storage.keys()
   end
 end
