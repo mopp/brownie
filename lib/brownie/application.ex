@@ -7,6 +7,9 @@ defmodule Brownie.Application do
 
   @impl Application
   def start(_type, _args) do
+    # FIXME: Wait for the all containers wake up.
+    Process.sleep(1 * 1000)
+
     topologies = [
       main: [
         strategy: Cluster.Strategy.Epmd,

@@ -32,9 +32,9 @@ use Mix.Config
 config :brownie,
   storage_backend: Brownie.StorageMemory,
   cluster_members: [
-    :one@brownie,
-    :two@brownie,
-    :three@brownie,
-    :four@brownie,
-    :five@brownie
+    :"one@brownie1.com",
+    :"two@brownie2.com",
+    :"three@brownie3.com",
+    :"four@brownie4.com",
+    :"five@brownie5.com"
   ]

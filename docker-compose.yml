@@ -1,0 +1,50 @@
+version: "3"
+services:
+  one:
+    image: brownie
+    command: iex --cookie develop --name one@brownie1.com -S mix
+    container_name: brownie1.com
+    volumes:
+      - .:/app
+    networks:
+      - net1
+
+  two:
+    image: brownie
+    command: iex --cookie develop --name two@brownie2.com -S mix
+    container_name: brownie2.com
+    volumes:
+      - .:/app
+    networks:
+     - net1
+
+  three:
+    image: brownie
+    command: iex --cookie develop --name three@brownie3.com -S mix
+    container_name: brownie3.com
+    volumes:
+      - .:/app
+    networks:
+     - net1
+
+  four:
+    image: brownie
+    command: iex --cookie develop --name four@brownie4.com -S mix
+    container_name: brownie4.com
+    volumes:
+      - .:/app
+    networks:
+     - net1
+
+  five:
+    image: brownie
+    command: iex --cookie develop --name five@brownie5.com -S mix
+    container_name: brownie5.com
+    volumes:
+      - .:/app
+    networks:
+     - net1
+
+networks:
+  net1:
+    driver: bridge
