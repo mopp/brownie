@@ -10,15 +10,25 @@ defmodule Brownie.Application do
   def start(_type, _args) do
     Logger.info("Start Brownie")
 
-    if length(get_cluster_members())  != 0 do
-      connect_cluster_members!()
-    end
+    members = get_cluster_members()
 
-    # List all child processes to be supervised.
-    children = [
-      Brownie.Coordinator.Supervisor,
-      get_backend()
-    ]
+    children =
+      if length(members) == 0 do
+        # Standalone mode.
+        []
+      else
+        # Try to make the cluster.
+        members = get_cluster_members() -- Node.list(:this)
+        connect_cluster_members!(members)
+        [{Brownie.Coordinator.Stabilizer, members}]
+      end
+
+    children =
+      children ++
+        [
+          Brownie.Coordinator.Supervisor,
+          get_backend()
+        ]
 
     Supervisor.start_link(children, strategy: :one_for_one)
   end
@@ -35,8 +45,7 @@ defmodule Brownie.Application do
     Application.get_env(:brownie, :replica_count, 3)
   end
 
-  defp connect_cluster_members!() do
-    members = get_cluster_members() -- Node.list(:this)
+  defp connect_cluster_members!(members) do
     pid = self()
 
     for member <- members do
