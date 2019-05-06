@@ -9,6 +9,7 @@ defmodule Brownie.Coordinator do
     case Brownie.Coordinator.Supervisor.start_child() do
       {:ok, pid} ->
         Brownie.Coordinator.Worker.request(pid, query)
+
       {:error, _} = error ->
         error
     end

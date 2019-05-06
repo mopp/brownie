@@ -7,10 +7,16 @@ defmodule Brownie.Application do
 
   @impl Application
   def start(_type, _args) do
-    # TODO: Wait making the cluster here.
+    topologies = [
+      main: [
+        strategy: Cluster.Strategy.Epmd,
+        config: [hosts: get_cluster_members()]
+      ]
+    ]
 
     # List all child processes to be supervised.
     children = [
+      {Cluster.Supervisor, [topologies, [name: Brownie.ClusterSupervisor]]},
       Brownie.Coordinator.Supervisor,
       get_backend()
     ]
