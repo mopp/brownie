@@ -11,6 +11,7 @@ defmodule Brownie.Application do
 
     # List all child processes to be supervised.
     children = [
+      Brownie.Coordinator.Supervisor,
       get_backend()
     ]
 
@@ -23,5 +24,9 @@ defmodule Brownie.Application do
 
   def get_cluster_members() do
     Application.fetch_env!(:brownie, :cluster_members)
+  end
+
+  def get_replica_count() do
+    Application.get_env(:brownie, :replica_count, 3)
   end
 end
