@@ -5,6 +5,7 @@ defmodule Brownie.Coordinator.Worker do
     @compile :nowarn_export_all
   end
 
+  require Logger
   use GenServer, restart: :temporary
 
   # @typep key() :: Brownie.key()
@@ -52,6 +53,7 @@ defmodule Brownie.Coordinator.Worker do
     case nodes do
       [] ->
         # Standalone mode
+        Logger.debug("Standalone mode")
         Brownie.Storage.request(query)
 
       nodes when length(nodes) < replica_count ->
@@ -61,11 +63,12 @@ defmodule Brownie.Coordinator.Worker do
       nodes ->
         case Brownie.Query.get_key(query) do
           {:ok, key} ->
-            hash = rem(term_to_hash(key), length(nodes))
-            replica_nodes = select_nodes(hash, replica_count, replica_count)
+            base_index = rem(term_to_hash(key), length(nodes))
+            replica_nodes = select_nodes(nodes, base_index, replica_count)
+            Logger.debug("Selected replica nodes: #{inspect(replica_nodes)}")
 
             replica_nodes
-            |> Node.spawn(Brownie.Storage, :request, [query])
+            |> Enum.map(fn node -> Node.spawn(node, Brownie.Storage, :request, [query]) end)
             |> handle_replica_results(replica_nodes, replica_count)
 
           {:error, _} = error ->
