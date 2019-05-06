@@ -21,7 +21,7 @@ defmodule Brownie do
     :world
   end
 
-  def test do
+  def test(is_wait \\ true) do
     kvs = [
       {"hoge", "fuga"},
       {"piyo", "poyo"},
@@ -46,8 +46,10 @@ defmodule Brownie do
     Enum.at(Brownie.Application.get_cluster_members(), 1)
     |> :rpc.call(:erlang, :halt, [])
 
-    # Wait for stabilization (cheating).
-    Process.sleep(3 * 1000)
+    if is_wait do
+      # Wait for stabilization (cheating).
+      Process.sleep(3 * 1000)
+    end
 
     members = Brownie.Application.get_cluster_members()
 
@@ -63,7 +65,7 @@ defmodule Brownie do
       |> Enum.map(fn {_, v} -> {:ok, v} end)
       |> Enum.sort()
 
-    if not results == expecteds do
+    if not (results == expecteds) do
       raise("Read values failed after node down! Results: #{inspect(results)}")
     end
 
