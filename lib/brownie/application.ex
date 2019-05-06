@@ -3,23 +3,19 @@ defmodule Brownie.Application do
   Main application module starts the all processes for Brownie.
   """
 
+  require Logger
   use Application
 
   @impl Application
   def start(_type, _args) do
-    # FIXME: Wait for the all containers wake up.
-    Process.sleep(1 * 1000)
+    Logger.info("Start Brownie")
 
-    topologies = [
-      main: [
-        strategy: Cluster.Strategy.Epmd,
-        config: [hosts: get_cluster_members()]
-      ]
-    ]
+    if length(get_cluster_members())  != 0 do
+      connect_cluster_members!()
+    end
 
     # List all child processes to be supervised.
     children = [
-      {Cluster.Supervisor, [topologies, [name: Brownie.ClusterSupervisor]]},
       Brownie.Coordinator.Supervisor,
       get_backend()
     ]
@@ -37,5 +33,47 @@ defmodule Brownie.Application do
 
   def get_replica_count() do
     Application.get_env(:brownie, :replica_count, 3)
+  end
+
+  defp connect_cluster_members!() do
+    members = get_cluster_members() -- Node.list(:this)
+    pid = self()
+
+    for member <- members do
+      Process.spawn(
+        fn ->
+          send(pid, connect_with_retry(member, 10, 100))
+        end,
+        []
+      )
+    end
+
+    for _ <- members do
+      receive do
+        {:ok, node} ->
+          Logger.info("Connect to #{inspect(node)}")
+
+        {:error, node} ->
+          msg = "Cannot connect to #{inspect(node)}"
+          Logger.error(msg)
+          raise(msg)
+      end
+    end
+  end
+
+  @spec connect_with_retry(node(), 0, non_neg_integer()) :: {:error, {:timeout, node()}}
+  defp connect_with_retry(node, 0, _) do
+    {:error, {:timeout, node}}
+  end
+
+  @spec connect_with_retry(node(), non_neg_integer(), non_neg_integer()) ::
+          {:ok, node()} | {:error, {:timeout, node()}}
+  defp connect_with_retry(node, count, sleep_interval) do
+    if true == Node.connect(node) do
+      {:ok, node}
+    else
+      Process.sleep(sleep_interval)
+      connect_with_retry(node, count - 1, sleep_interval)
+    end
   end
 end

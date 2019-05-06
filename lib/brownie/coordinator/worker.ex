@@ -92,6 +92,7 @@ defmodule Brownie.Coordinator.Worker do
   @spec handle_replica_results([result()], [node()], non_neg_integer()) :: result()
   defp handle_replica_results(results, replica_nodes, replica_count) do
     Logger.debug("Results: #{inspect(results)}")
+
     {count_oks, result} =
       List.foldl(results, {0, nil}, fn
         :ok, {count, _} ->

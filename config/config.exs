@@ -29,12 +29,17 @@ use Mix.Config
 #
 #     import_config "#{Mix.env()}.exs"
 
-config :brownie,
-  storage_backend: Brownie.StorageMemory,
-  cluster_members: [
-    :"one@brownie1.com",
-    :"two@brownie2.com",
-    :"three@brownie3.com",
-    :"four@brownie4.com",
-    :"five@brownie5.com"
-  ]
+if Mix.env() == :test do
+  config :brownie,
+    cluster_members: []
+else
+  config :brownie,
+    storage_backend: Brownie.StorageMemory,
+    cluster_members: [
+      :"one@brownie1.com",
+      :"two@brownie2.com",
+      :"three@brownie3.com",
+      :"four@brownie4.com",
+      :"five@brownie5.com"
+    ]
+end
