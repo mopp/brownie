@@ -67,8 +67,9 @@ defmodule Brownie.Coordinator.Worker do
             replica_nodes = select_nodes(nodes, base_index, replica_count)
             Logger.debug("Selected replica nodes: #{inspect(replica_nodes)}")
 
+            # TODO: execute asynchronously
             replica_nodes
-            |> Enum.map(fn node -> Node.spawn(node, Brownie.Storage, :request, [query]) end)
+            |> Enum.map(fn node -> :rpc.call(node, Brownie.Storage, :request, [query]) end)
             |> handle_replica_results(replica_nodes, replica_count)
 
           {:error, _} = error ->
@@ -90,6 +91,7 @@ defmodule Brownie.Coordinator.Worker do
 
   @spec handle_replica_results([result()], [node()], non_neg_integer()) :: result()
   defp handle_replica_results(results, replica_nodes, replica_count) do
+    Logger.debug("Results: #{inspect(results)}")
     {count_oks, result} =
       List.foldl(results, {0, nil}, fn
         :ok, {count, _} ->
